@@ -16,7 +16,8 @@ import os
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
-from django.http import HttpResponse
+from django.db.models import Q
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import redirect, render
 from django.views import View
@@ -218,11 +219,12 @@ class UploadLogView(View):
 # ──────────────────────────────────────────────
 
 def export_csv(request):
-    """根据当前筛选条件导出 CSV."""
-    # 决定导出哪些列 — 通过 URL query params 传递
-    columns = request.GET.getlist("columns")
-    if not columns:
-        columns = [
+    """根据当前筛选条件导出 CSV (支持 scope/device/columns)."""
+    scope = request.GET.get("scope", "filtered")
+    device_name = request.GET.get("device", "")
+    export_columns = request.GET.getlist("columns")
+    if not export_columns:
+        export_columns = [
             "device__hostname", "name", "phy_status", "protocol_status",
             "description", "transceiver__module_type", "transceiver__vendor_name",
             "transceiver__serial_number", "lldp_neighbor__remote_device",
@@ -271,11 +273,11 @@ def export_csv(request):
         "lldp_neighbor__remote_interface": "对端接口",
     }
 
-    writer.writerow([header_map.get(c, c) for c in columns])
+    writer.writerow([header_map.get(c, c) for c in export_columns])
 
     for iface in qs.iterator(chunk_size=200):
         row = []
-        for col in columns:
+        for col in export_columns:
             val = _resolve_nested_attr(iface, col)
             row.append(str(val) if val is not None else "")
         writer.writerow(row)
@@ -368,13 +370,88 @@ class TopologyAPI(APIView):
             "nodes": list(nodes.values()),
             "edges": edges,
         })
-        if not form.is_valid():
-            messages.error(request, "表单验证失败，请重试。")
-            return redirect("asset_management:dashboard")
 
-@require_POST
+def clean_distance(d):
+    import re
+    if d and '(' in d:
+        m = re.match(r"^(\d+(?:\.\d+)?)", d)
+        if m: return m.group(1)
+    return d or ""
+
+
+def interface_table_data(request):
+    draw = int(request.GET.get("draw", 1))
+    start = int(request.GET.get("start", 0))
+    length = int(request.GET.get("length", 10))
+    search_value = request.GET.get("search[value]", "").strip()
+    order_col_idx = request.GET.get("order[0][column]", "0")
+    order_dir = request.GET.get("order[0][dir]", "asc")
+
+    col_names = [
+        "device__hostname", "name", "phy_status", "protocol_status", "description",
+        "transceiver__module_type", "transceiver__vendor_name", "transceiver__part_number",
+        "transceiver__serial_number", "transceiver__manufacturing_date", "transceiver__transfer_distance",
+        "transceiver__connector_type", "transceiver__wavelength",
+        "lldp_neighbor__remote_device", "lldp_neighbor__remote_interface",
+    ]
+    idx = int(order_col_idx) if order_col_idx.isdigit() and int(order_col_idx) < len(col_names) else 1
+    order_col = col_names[idx]
+    if order_dir == "desc":
+        order_col = "-" + order_col
+
+    type_filter = request.GET.get("type", "physical")
+    device_filter = request.GET.get("device", "")
+    phy_filter = request.GET.get("phy", "")
+    proto_filter = request.GET.get("proto", "")
+
+    qs = Interface.objects.select_related("device").all()
+    if type_filter in ("physical", "logical"):
+        qs = qs.filter(interface_type=type_filter)
+    if device_filter:
+        qs = qs.filter(device__hostname__startswith=device_filter)
+    if phy_filter in ("up", "down"):
+        qs = qs.filter(phy_status=phy_filter)
+    if proto_filter in ("up", "down"):
+        qs = qs.filter(protocol_status=proto_filter)
+    records_total = qs.count()
+
+    if search_value:
+        qs = qs.filter(
+            Q(name__icontains=search_value) | Q(description__icontains=search_value) |
+            Q(device__hostname__icontains=search_value) | Q(transceiver__vendor_name__icontains=search_value) |
+            Q(transceiver__serial_number__icontains=search_value) | Q(lldp_neighbor__remote_device__icontains=search_value)
+        )
+    records_filtered = qs.count()
+    qs = qs.order_by(order_col)[start:start + length]
+
+    data = []
+    for iface in qs:
+        try:
+            tr = iface.transceiver
+        except:
+            tr = None
+        try:
+            ll = iface.lldp_neighbor
+        except:
+            ll = None
+        data.append({
+            "device_hostname": iface.device.hostname, "name": iface.name,
+            "phy_status": iface.phy_status, "protocol_status": iface.protocol_status,
+            "description": iface.description or "",
+            "transceiver_module_type": tr.module_type if tr else "",
+            "transceiver_vendor_name": tr.vendor_name if tr else "",
+            "transceiver_part_number": tr.part_number if tr else "",
+            "transceiver_serial_number": tr.serial_number if tr else "",
+            "transceiver_manufacturing_date": tr.manufacturing_date if tr else "",
+            "transceiver_transfer_distance": clean_distance(tr.transfer_distance) if tr else "",
+            "transceiver_connector_type": tr.connector_type if tr else "",
+            "transceiver_wavelength": tr.wavelength if tr else "",
+            "lldp_remote_device": ll.remote_device if ll else "",
+            "lldp_remote_interface": ll.remote_interface if ll else "",
+        })
+    return JsonResponse({"draw": draw, "recordsTotal": records_total, "recordsFiltered": records_filtered, "data": data})
+
 def clear_data(request):
-    from django.http import JsonResponse
     try:
         from .models import Interface, Transceiver, LLDPNeighbor
         cnt_i, _ = Interface.objects.all().delete()

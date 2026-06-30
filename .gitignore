@@ -31,3 +31,7 @@ debug.html
 # Project specific - debug and private data
 allow_lan_access.bat
 log/
+
+api_error.txt
+last_error.txtsrv_log.txtsrv_log2.txt
+error_log*.txt

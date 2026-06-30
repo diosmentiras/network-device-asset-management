@@ -31,7 +31,7 @@
         <div class="card stat-card border-start border-success border-4 shadow-sm h-100">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="stat-number">{{ all_interfaces_count }}</div>
+                    <div class="stat-number">{{ total_interfaces }}</div>
                     <div class="stat-label">接口总数</div>
                 </div>
                 <i class="bi bi-ethernet stat-icon text-success"></i>
@@ -109,7 +109,6 @@
     </div>
 </div>
 
-{% if interfaces %}
 <!-- 数据表格 -->
 <div class="table-container">
     <div class="table-header">
@@ -151,59 +150,81 @@
                     <th data-col="lldp_neighbor__remote_interface">对端接口</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for iface in interfaces %}
-                <tr>
-                    <td class="fw-medium">{{ iface.device.hostname }}</td>
-                    <td><code>{{ iface.name }}</code></td>
-                    <td>
-                        {% if iface.phy_status == "up" %}
-                            <span class="badge-up"><i class="bi bi-arrow-up-circle me-1"></i>up</span>
-                        {% else %}
-                            <span class="badge-down"><i class="bi bi-arrow-down-circle me-1"></i>{{ iface.phy_status|default:"down" }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if iface.protocol_status == "up" %}
-                            <span class="badge-up"><i class="bi bi-arrow-up-circle me-1"></i>up</span>
-                        {% else %}
-                            <span class="badge-down"><i class="bi bi-arrow-down-circle me-1"></i>{{ iface.protocol_status|default:"down" }}</span>
-                        {% endif %}
-                    </td>
-                    <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ iface.description|default:'' }}">{{ iface.description|default:"" }}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.module_type }}{% endif %}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.vendor_name }}{% endif %}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.part_number }}{% endif %}</td>
-                    <td>{% if iface.transceiver %}<code>{{ iface.transceiver.serial_number }}</code>{% endif %}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.manufacturing_date }}{% endif %}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.transfer_distance }}{% endif %}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.connector_type }}{% endif %}</td>
-                    <td>{% if iface.transceiver %}{{ iface.transceiver.wavelength }}{% endif %}</td>
-                    <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{% if iface.lldp_neighbor %}{{ iface.lldp_neighbor.remote_device }}{% endif %}</td>
-                    <td>{% if iface.lldp_neighbor %}{{ iface.lldp_neighbor.remote_interface }}{% endif %}</td>
-                </tr>
-                {% endfor %}
+                        <tbody>
             </tbody>
         </table>
     </div>
 </div>
-{% else %}
-<!-- 空数据提示 -->
-<div class="card border-0 shadow-sm text-center py-5" style="border-radius:var(--card-radius);">
-    <div class="card-body">
-        <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
-        <h5 class="text-muted fw-normal mb-2">暂无数据</h5>
-        <p class="text-muted small mb-3">尚未上传任何日志文件，请先上传。</p>
-        <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#uploadModal">
-            <i class="bi bi-cloud-upload me-1"></i>上传日志
-        </button>
-    </div>
-</div>
-{% endif %}
+
 
 {% endblock %}
 
 {% block extra_modals %}
+
+<!-- 导出选项 Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold"><i class="bi bi-download me-2 text-success"></i>导出 CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">导出范围</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exportScope" id="scopeFiltered" value="filtered" checked>
+                                <label class="form-check-label small" for="scopeFiltered">当前筛选</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exportScope" id="scopeDevice" value="device">
+                                <label class="form-check-label small" for="scopeDevice">指定设备</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="exportScope" id="scopeAll" value="all">
+                                <label class="form-check-label small" for="scopeAll">全部导出</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="exportDeviceGroup" style="display:none;">
+                        <label class="form-label small fw-medium">选择设备</label>
+                        <select class="form-select form-select-sm" id="exportDevice">
+                            {% for d in devices %}
+                            <option value="{{ d.hostname }}">{{ d.hostname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">选择列 <span class="text-muted fw-normal">(不选则全部)</span></label>
+                        <div class="row g-1" id="exportColumns">
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="device__hostname" checked><label class="form-check-label small">设备名称</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="name" checked><label class="form-check-label small">接口名称</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="phy_status" checked><label class="form-check-label small">物理状态</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="protocol_status" checked><label class="form-check-label small">协议状态</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="description"><label class="form-check-label small">描述</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__module_type"><label class="form-check-label small">模块类型</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__vendor_name"><label class="form-check-label small">模块厂商</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__part_number"><label class="form-check-label small">部件编号</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__serial_number"><label class="form-check-label small">序列号</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__manufacturing_date"><label class="form-check-label small">生产日期</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__transfer_distance"><label class="form-check-label small">传输距离</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__connector_type"><label class="form-check-label small">连接器</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="transceiver__wavelength"><label class="form-check-label small">波长</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="lldp_neighbor__remote_device"><label class="form-check-label small">对端设备</label></div></div>
+                            <div class="col-6"><div class="form-check"><input class="form-check-input export-col" type="checkbox" value="lldp_neighbor__remote_interface"><label class="form-check-label small">对端接口</label></div></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success px-4" id="confirmExport"><i class="bi bi-download me-1"></i>导出</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="clearDataModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
@@ -227,40 +248,116 @@
 {% endblock %}
 
 {% block extra_js %}
+<style>
+/* Column resize handles */
+table.dataTable th .resize-handle {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 4px;
+    cursor: col-resize; background: transparent; z-index: 10;
+}
+table.dataTable th .resize-handle:hover,
+table.dataTable th .resize-handle.resizing { background: rgba(37,99,235,0.4); }
+table.dataTable th { position: relative; }
+.table-responsive { overflow-x: auto !important; }
+        table.dataTable td, table.dataTable th {
+    overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;
+}
+</style>
 <script>
 (function(){
     var table = null;
+
     function initTable(){
         if(!document.getElementById("interfaceTable")) return;
         if($.fn.DataTable.isDataTable("#interfaceTable")){
             $("#interfaceTable").DataTable().destroy();
         }
+
         table = $("#interfaceTable").DataTable({
+            serverSide: true,
+            ajax: {
+                url: "/api/table-data/",
+                data: function(d){
+                    d.type = $("input[name=filterType]:checked").val() || "physical";
+                    d.device = $("#filterDevice").val() || "";
+                    d.phy = $("#filterPhy").val() || "";
+                    d.proto = $("#filterProto").val() || "";
+                }
+            },
+            columns: [
+                {data:"device_hostname",render:function(d){return "<span class=fw-medium>"+d+"</span>";}},
+                {data:"name",render:function(d){return "<code>"+d+"</code>";}},
+                {data:"phy_status",render:function(d){return d==="up"?"<span class=badge-up><i class=bi-arrow-up-circle me-1></i>up</span>":"<span class=badge-down><i class=bi-arrow-down-circle me-1></i>"+(d||"down")+"</span>";}},
+                {data:"protocol_status",render:function(d){return d==="up"?"<span class=badge-up><i class=bi-arrow-up-circle me-1></i>up</span>":"<span class=badge-down><i class=bi-arrow-down-circle me-1></i>"+(d||"down")+"</span>";}},
+                {data:"description",render:function(d){return d||"";}},
+                {data:"transceiver_module_type"},
+                {data:"transceiver_vendor_name"},
+                {data:"transceiver_part_number"},
+                {data:"transceiver_serial_number",render:function(d){return d?"<code>"+d+"</code>":"";}},
+                {data:"transceiver_manufacturing_date"},
+                {data:"transceiver_transfer_distance"},
+                {data:"transceiver_connector_type"},
+                {data:"transceiver_wavelength"},
+                {data:"lldp_remote_device",render:function(d){return d||"";}},
+                {data:"lldp_remote_interface"}
+            ],
+            scrollX: true,
+            scrollCollapse: true,
+            autoWidth: false,
+            pageLength: 10,
+            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,"全部"]],
             language: {
                 url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANS.json",
                 search: '<i class="bi bi-search me-1"></i>搜索:',
                 searchPlaceholder: "接口/描述/设备..."
             },
-            pageLength: 25,
-            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,"全部"]],
             order: [[0,"asc"],[1,"asc"]],
-            columnDefs: [{targets:"_all",className:"dt-head-left"}],
+            columnDefs: [{targets:"_all",className:"dt-body-nowrap"}],
             dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             buttons: [
                 {extend:"colvis",text:'<i class="bi bi-eye-slash me-1"></i> 显示/隐藏列',className:"btn btn-outline-secondary btn-sm",columns:":gt(0)",postfixButtons:["colvisRestore"],collectionLayout:"fixed two-column"},
-                {extend:"csvHtml5",text:'<i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV',className:"btn btn-outline-success btn-sm",title:"network_assets",charset:"utf-8",bom:true,exportOptions:{columns:":visible"}}
-            ]
+                {extend:"csvHtml5",text:'<i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV',className:"btn btn-outline-success btn-sm",title:"network_assets",charset:"utf-8",bom:true,exportOptions:{columns:":visible",format:{body:function(d){return d?d.replace(/<[^>]*>/g,""):"";}}}}
+            ],
+            initComplete: function(){
+                $("#interfaceTable thead th").each(function(){
+                    if(!$(this).find(".resize-handle").length){
+                        $(this).append('<div class="resize-handle"></div>');
+                    }
+                });
+            }
         });
+
         $("#toggleColvis").on("click",function(){ if(table){ table.button(".buttons-colvis").trigger(); } });
         $("#exportCsv").on("click",function(e){
             e.preventDefault();
-            if(table){ table.button(".buttons-csv").trigger(); }
-            else { window.location.href = this.href; }
+            $("#exportModal").modal("show");
         });
     }
+
+    // Column resize via drag on .resize-handle
+    $(document).on("mousedown", ".resize-handle", function(e){
+        e.preventDefault();
+        var $handle = $(this);
+        var $th = $handle.parent();
+        var startX = e.pageX;
+        var startWidth = $th.width();
+        $handle.addClass("resizing");
+        $(document).on("mousemove.resize", function(e){
+            var newWidth = Math.max(30, startWidth + (e.pageX - startX));
+            $th.width(newWidth + "px");
+            // Sync with DataTables
+            if(table){
+                table.columns.adjust();
+            }
+        });
+        $(document).on("mouseup.resize", function(){
+            $handle.removeClass("resizing");
+            $(document).off(".resize");
+        });
+    });
+
     $(document).ready(function(){ setTimeout(initTable, 100); });
 
-    // Filter controls: build query and navigate
+    // Filter controls: navigate on change
     function buildQuery() {
         var p = new URLSearchParams();
         var dv = $("#filterDevice").val();
@@ -280,7 +377,7 @@
         window.location.href = "?" + buildQuery();
     });
 
-    // Clear data button
+    // Clear data
     $("#confirmClearData").on("click", function(){
         var btn = $(this);
         btn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm me-1"></span>清理中...');
@@ -294,6 +391,25 @@
                 btn.prop("disabled", false).html('<i class="bi bi-trash3 me-1"></i>确认清空');
             }
         });
+    });
+
+    // Export modal
+    $("input[name='exportScope']").on("change", function(){
+        $("#exportDeviceGroup").toggle(this.value === "device");
+    });
+    $("#confirmExport").on("click", function(){
+        var scope = $("input[name='exportScope']:checked").val();
+        var params = new URLSearchParams();
+        params.set("scope", scope);
+        var type = $("input[name='filterType']:checked").val() || "physical";
+        params.set("type", type);
+        if(scope === "device"){
+            params.set("device", $("#exportDevice").val());
+        }
+        var cols = [];
+        $(".export-col:checked").each(function(){ cols.push(this.value); });
+        if(cols.length) cols.forEach(function(c){ params.append("columns", c); });
+        window.location.href = "/export/csv/?" + params.toString();
     });
 })();
 </script>

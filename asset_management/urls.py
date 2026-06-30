@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/lldp-neighbors/", views.LLDPNeighborListAPI.as_view(), name="api_lldp"),
 
     # 4. 拓扑接口 (为 D3.js / ECharts 前端预留, 目前基于 LLDP)
+    path("api/table-data/", views.interface_table_data, name="table_data"),
     path("api/clear-data/", views.clear_data),
     path("api/topology/", views.TopologyAPI.as_view(), name="api_topology"),
 ]

@@ -19,6 +19,17 @@ import re
 RE_STATUS_CLEAN = re.compile(r"^[\*\(\)a-z\^]*down|^up\([a-z]+\)$")
 
 
+
+def clean_transfer_distance(distance: str) -> str:
+    """提取传输距离的纯数字部分, 去掉括号内容.
+    10000(9um/125um SMF) -> 10000,  16(Optical Cable) -> 16
+    """
+    if not distance:
+        return ""
+    m = re.match(r"^(\d+(?:\.\d+)?)", distance.strip())
+    return m.group(1) if m else distance
+
+
 def clean_status(status: str) -> str:
     """清理状态标记, e.g. *down -> down, up(s) -> up."""
     s = status.strip().lower()

@@ -1,0 +1,22 @@
+Internal Server Error: /api/table-data/
+Traceback (most recent call last):
+  File "C:\Users\26319\scoop\apps\python\current\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\26319\scoop\apps\python\current\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\26319\Documents\网络设备日志分析与资产管理\asset_management\views.py", line 444, in interface_table_data
+    return JsonResponse({"draw": draw, "recordsTotal": records_total, "recordsFiltered": records_filtered, "data": data})
+           ^^^^^^^^^^^^
+NameError: name 'JsonResponse' is not defined. Did you mean: 'HttpResponse'?
+[30/Jun/2026 16:26:36] "GET /api/table-data/?draw=1&start=0&length=10&type=physical HTTP/1.1" 500 74770
+Internal Server Error: /api/table-data/
+Traceback (most recent call last):
+  File "C:\Users\26319\scoop\apps\python\current\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\26319\scoop\apps\python\current\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\26319\Documents\网络设备日志分析与资产管理\asset_management\views.py", line 444, in interface_table_data
+    return JsonResponse({"draw": draw, "recordsTotal": records_total, "recordsFiltered": records_filtered, "data": data})
+           ^^^^^^^^^^^^
+NameError: name 'JsonResponse' is not defined. Did you mean: 'HttpResponse'?
+[30/Jun/2026 16:27:27] "GET /api/table-data/?draw=1&start=0&length=10&type=physical HTTP/1.1" 500 74783
