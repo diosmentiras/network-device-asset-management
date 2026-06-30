@@ -1,0 +1,33 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Django
+*.sqlite3
+*.sqlite3-journal
+staticfiles/
+media/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime logs
+server_log.txt
+server_log*.txt
+error_log*.txt
+error_ascii.txt
+debug.html
+
+# Project specific - debug and private data
+allow_lan_access.bat
+log/

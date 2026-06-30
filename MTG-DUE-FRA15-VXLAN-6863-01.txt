@@ -1,0 +1,1553 @@
+
+Info: The max number of VTY users is 5, the number of current VTY users online is 1, and total number of terminal users online is 1.
+      The current login time is 2026-06-29 01:01:47+08:00.
+<MTG-DEU-FRA15-VXLAN-6863-01>display cur | no-more
+!Software Version V200R024C00SPC500
+!Last configuration was updated at 2026-06-16 12:05:06+08:00 by KC
+!Last configuration was saved at 2026-06-16 12:06:29+08:00 by KC
+#
+clock timezone SG add 08:00:00
+#
+sysname MTG-DEU-FRA15-VXLAN-6863-01
+#
+ftp server enable
+ftp server source all-interface
+undo ftp ipv6 server source all-interface
+ftp server default-directory flash:/
+#
+undo port link-flap trigger error-down
+#
+transceiver non-certified-alarm disable
+#
+device board 1 board-type CE6863-48S6CQ
+#
+drop-profile default
+#
+dcb pfc
+#
+ntp server disable
+ntp ipv6 server disable
+ntp server source-interface all disable
+ntp ipv6 server source-interface all disable
+ntp unicast-server 172.16.88.38 vpn-instance NMS source-interface LoopBack698
+#
+configuration file auto-save interval 600 delay 3 cpu-limit 60
+#
+telnet ipv6 server disable
+telnet server-source all-interface
+undo telnet ipv6 server-source all-interface
+#
+hwtacacs enable
+#
+diffserv domain default
+#
+evpn
+ mac-duplication
+#
+ip vpn-instance NMS
+ ipv4-family
+  route-distinguisher 1866:1866
+  vpn-target 1866:1866 export-extcommunity
+  vpn-target 1866:1866 import-extcommunity
+#
+hwtacacs server template tacgui
+ hwtacacs server 172.16.88.188 vpn-instance NMS shared-key cipher %^%#PDAPBe@G0.l7;p@`AMN9]I9Y+alWROneeXSmC["1%^%#
+ hwtacacs server source-ip 172.16.98.55
+ hwtacacs server user-name domain-excluded
+#
+bfd
+#
+bridge-domain 3224
+ description P18_[FRA15<>AMS11]_VLAN3224
+ vxlan vni 3224
+ vtep-src 192.168.12.30
+#
+bridge-domain 3225
+ description P18_[FRA15<>AMS11]_VLAN3225_BFD
+ vxlan vni 3225
+ vtep-src 192.168.12.30
+#
+dhcp server request-packet all-interface disable
+#
+aaa
+ undo local-user policy security-enhance
+ default-domain admin tacgui
+ local-user wayne password irreversible-cipher $1c$5xx47a3k=G$2g:|~1Ha2%eg"!3QL@!<cno68epIx+6+Sj.YxxvC$
+ local-user wayne service-type ftp telnet ssh
+ local-user wayne level 3
+ local-user wayne ftp-directory flash:
+ #
+ authentication-scheme default
+ #
+ authentication-scheme tacgui
+  authentication-mode hwtacacs local
+ #
+ authorization-scheme default
+ #
+ authorization-scheme tacgui
+  authorization-mode hwtacacs local
+ #
+ accounting-scheme default
+ #
+ accounting-scheme tacgui
+  accounting-mode hwtacacs
+ #
+ domain default
+ #
+ domain default_admin
+ #
+ domain tacgui
+  authentication-scheme tacgui
+  authorization-scheme tacgui
+  accounting-scheme tacgui
+  hwtacacs server tacgui
+ #
+ recording-scheme tacgui
+  recording-mode hwtacacs tacgui
+ #
+ system recording-scheme tacgui
+ #
+ outbound recording-scheme tacgui
+ #
+ cmd recording-scheme tacgui
+#
+stack
+#
+license
+#
+warranty
+#
+interface MEth0/0/0
+ ip address 192.168.128.103 255.255.255.0
+#
+interface Eth-Trunk0
+ undo portswitch
+ description TO CE6860
+ mode lacp-static
+ jumboframe enable 15360
+#
+interface Eth-Trunk0.1698
+ description NMS
+ ip binding vpn-instance NMS
+ ip address 172.16.97.61 255.255.255.252
+ dot1q termination vid 1698
+#
+interface Eth-Trunk2
+ undo portswitch
+ description P18-[FRA15<>AMS11]-TO CE6860
+ mode lacp-static
+ jumboframe enable 15360
+#
+interface Eth-Trunk2.3224 mode l2
+ description P18_[FRA15<>AMS11]_VLAN3224
+ encapsulation dot1q vid 3224
+ bridge-domain 3224
+ statistics enable
+#
+interface Eth-Trunk2.3225 mode l2
+ description P18_[FRA15<>AMS11]_VLAN3225_BFD
+ encapsulation dot1q vid 3225
+ bridge-domain 3225
+ statistics enable
+#
+interface Eth-Trunk5
+ undo portswitch
+ description TO CE6863-02
+ mode lacp-static
+ jumboframe enable 15360
+#
+interface Eth-Trunk5.1698
+ description NMS
+ ip binding vpn-instance NMS
+ ip address 172.16.97.133 255.255.255.252
+ dot1q termination vid 1698
+#
+interface Eth-Trunk6
+ undo portswitch
+ description PE01<>PE02
+ mode lacp-static
+ jumboframe enable 15360
+#
+interface Eth-Trunk6.100
+ mtu 9216
+ description PE01<>PE02
+ ip address 192.168.101.197 255.255.255.252
+ dot1q termination vid 100
+ ospf cost 10
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk6.110
+ mtu 9216
+ description PE01<>PE02
+ ip address 192.168.111.197 255.255.255.252
+ dot1q termination vid 110
+ ospf cost 10
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk10
+ undo portswitch
+ description RETN_LL-[FRA15<>FR4]
+ mode lacp-static
+ jumboframe enable 15360
+#
+interface Eth-Trunk10.100
+ mtu 9216
+ description RETN_LL-[FRA15<>FR4]
+ ip address 192.168.101.78 255.255.255.252
+ dot1q termination vid 100
+ ospf cost 50
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk10.110
+ mtu 9216
+ description RETN_LL-[FRA15<>FR4]
+ ip address 192.168.111.78 255.255.255.252
+ dot1q termination vid 110
+ ospf cost 50
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk10.120
+ mtu 9216
+ description RETN_LL-[FRA15<>FR4]
+ ip address 192.168.121.78 255.255.255.252
+ dot1q termination vid 120
+ ospf cost 50
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk10.130
+ mtu 9216
+ description RETN_LL-[FRA15<>FR4]
+ ip address 192.168.131.78 255.255.255.252
+ dot1q termination vid 130
+ ospf cost 50
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk10.140
+ mtu 9216
+ description RETN_LL-[FRA15<>FR4]
+ ip address 192.168.141.78 255.255.255.252
+ dot1q termination vid 140
+ ospf cost 50
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk10.1698
+ description NMS
+ ip binding vpn-instance NMS
+ ip address 172.16.97.125 255.255.255.252
+ dot1q termination vid 1698
+#
+interface Eth-Trunk63
+ undo portswitch
+ description ZAYO-[FRA15<>AMS11]
+ mode lacp-static
+ jumboframe enable 15360
+#
+interface Eth-Trunk63.100
+ mtu 9216
+ description ZAYO-[FRA15<>AMS11]
+ ip address 192.168.101.58 255.255.255.252
+ dot1q termination vid 100
+ ospf cost 100
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk63.110
+ mtu 9216
+ description ZAYO-[FRA15<>AMS11]
+ ip address 192.168.111.58 255.255.255.252
+ dot1q termination vid 110
+ ospf cost 100
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk63.120
+ mtu 9216
+ description ZAYO-[FRA15<>AMS11]
+ ip address 192.168.121.58 255.255.255.252
+ dot1q termination vid 120
+ ospf cost 100
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk63.130
+ mtu 9216
+ description ZAYO-[FRA15<>AMS11]
+ ip address 192.168.131.58 255.255.255.252
+ dot1q termination vid 130
+ ospf cost 100
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk63.140
+ mtu 9216
+ description ZAYO-[FRA15<>AMS11]
+ ip address 192.168.141.58 255.255.255.252
+ dot1q termination vid 140
+ ospf cost 100
+ ospf peer hold-max-cost timer 1000000
+ ospf frr block
+ statistics enable
+#
+interface Eth-Trunk63.1698
+ description NMS
+ ip binding vpn-instance NMS
+ ip address 172.16.97.118 255.255.255.252
+ dot1q termination vid 1698
+#
+interface 25GE1/0/1
+ undo portswitch
+ ip address 10.10.10.1 255.255.255.252
+ device transceiver 10GBASE-FIBER
+ port mode 10G
+#
+interface 25GE1/0/2
+ port mode 10G
+#
+interface 25GE1/0/3
+ port mode 10G
+#
+interface 25GE1/0/4
+ port mode 10G
+#
+interface 25GE1/0/5
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/6
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/7
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/8
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/9
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/10
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/11
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/12
+ description TO CE6863-02
+ eth-trunk 5
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/13
+#
+interface 25GE1/0/14
+#
+interface 25GE1/0/15
+#
+interface 25GE1/0/16
+#
+interface 25GE1/0/17
+#
+interface 25GE1/0/18
+#
+interface 25GE1/0/19
+#
+interface 25GE1/0/20
+#
+interface 25GE1/0/21
+#
+interface 25GE1/0/22
+#
+interface 25GE1/0/23
+#
+interface 25GE1/0/24
+#
+interface 25GE1/0/25
+#
+interface 25GE1/0/26
+#
+interface 25GE1/0/27
+#
+interface 25GE1/0/28
+#
+interface 25GE1/0/29
+#
+interface 25GE1/0/30
+#
+interface 25GE1/0/31
+#
+interface 25GE1/0/32
+#
+interface 25GE1/0/33
+#
+interface 25GE1/0/34
+#
+interface 25GE1/0/35
+#
+interface 25GE1/0/36
+#
+interface 25GE1/0/37
+#
+interface 25GE1/0/38
+#
+interface 25GE1/0/39
+#
+interface 25GE1/0/40
+#
+interface 25GE1/0/41
+#
+interface 25GE1/0/42
+#
+interface 25GE1/0/43
+#
+interface 25GE1/0/44
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/45
+ undo portswitch
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/46
+ undo portswitch
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/47
+ undo portswitch
+ device transceiver 25GBASE-FIBER
+#
+interface 25GE1/0/48
+ undo portswitch
+ device transceiver 25GBASE-FIBER
+#
+interface 100GE1/0/1
+ description TO CE6860
+ eth-trunk 0
+ device transceiver 100GBASE-FIBER
+#
+interface 100GE1/0/2
+ description P18-[FRA15<>AMS11]-TO CE6860
+ eth-trunk 2
+ device transceiver 100GBASE-FIBER
+#
+interface 100GE1/0/3
+ description ZAYO-[FRA15<>AMS11]-XCID:(X02)
+ eth-trunk 63
+ device transceiver 100GBASE-FIBER
+#
+interface 100GE1/0/4
+ description RETN_LL-[FRA15<>FR4]-XCID:DE289452(X01)
+ eth-trunk 10
+ device transceiver 100GBASE-FIBER
+#
+interface 100GE1/0/5
+ description PE01<>PE02
+ eth-trunk 6
+ device transceiver 100GBASE-FIBER
+#
+interface 100GE1/0/6
+ device transceiver 100GBASE-FIBER
+#
+interface LoopBack100
+ description OSPF 100
+ ip address 192.168.10.30 255.255.255.255
+#
+interface LoopBack110
+ description OSPF 110
+ ip address 192.168.11.30 255.255.255.255
+#
+interface LoopBack120
+ description OSPF 120
+ ip address 192.168.12.30 255.255.255.255
+#
+interface LoopBack130
+ description OSPF 130
+ ip address 192.168.13.30 255.255.255.255
+#
+interface LoopBack140
+ description OSPF 140
+ ip address 192.168.14.30 255.255.255.255
+#
+interface LoopBack698
+ description NMS
+ ip binding vpn-instance NMS
+ ip address 172.16.98.55 255.255.255.255
+#
+interface Nve1
+ vni 3224 head-end peer-list 192.168.12.34
+ vni 3225 head-end peer-list 192.168.12.34
+#
+interface NULL0
+#
+ospf 100 router-id 192.168.10.30
+ bfd all-interfaces enable
+ bfd all-interfaces min-tx-interval 50 min-rx-interval 50
+ opaque-capability enable
+ hostname
+ area 0.0.0.0
+  network 192.168.10.30 0.0.0.0 description RID
+  network 192.168.101.56 0.0.0.3 description ZAYO-[FRA15<>AMS11]
+  network 192.168.101.76 0.0.0.3 description RETN_LL-[FRA15<>FR4]
+  network 192.168.101.196 0.0.0.3 description PE01<>PE02
+#
+ospf 110 router-id 192.168.11.30
+ bfd all-interfaces enable
+ bfd all-interfaces min-tx-interval 50 min-rx-interval 50
+ opaque-capability enable
+ hostname
+ area 0.0.0.0
+  network 192.168.11.30 0.0.0.0 description RID
+  network 192.168.111.56 0.0.0.3 description ZAYO-[FRA15<>AMS11]
+  network 192.168.111.76 0.0.0.3 description RETN_LL-[FRA15<>FR4]
+  network 192.168.111.196 0.0.0.3 description PE01<>PE02
+#
+ospf 120 router-id 192.168.12.30
+ bfd all-interfaces enable
+ bfd all-interfaces min-tx-interval 50 min-rx-interval 50
+ opaque-capability enable
+ hostname
+ area 0.0.0.0
+  network 192.168.12.30 0.0.0.0 description RID
+  network 192.168.121.56 0.0.0.3 description ZAYO-[FRA15<>AMS11]
+  network 192.168.121.76 0.0.0.3 description RETN_LL-[FRA15<>FR4]
+#
+ospf 130 router-id 192.168.13.30
+ bfd all-interfaces enable
+ bfd all-interfaces min-tx-interval 50 min-rx-interval 50
+ opaque-capability enable
+ hostname
+ area 0.0.0.0
+  network 192.168.13.30 0.0.0.0 description RID
+  network 192.168.131.56 0.0.0.3 description ZAYO-[FRA15<>AMS11]
+  network 192.168.131.76 0.0.0.3 description RETN_LL-[FRA15<>FR4]
+#
+ospf 140 router-id 192.168.14.30
+ bfd all-interfaces enable
+ bfd all-interfaces min-tx-interval 50 min-rx-interval 50
+ opaque-capability enable
+ hostname
+ area 0.0.0.0
+  network 192.168.14.30 0.0.0.0 description RID
+  network 192.168.141.56 0.0.0.3 description ZAYO-[FRA15<>AMS11]
+  network 192.168.141.76 0.0.0.3 description RETN_LL-[FRA15<>FR4]
+#
+ospf 1698 router-id 172.16.98.55 vpn-instance NMS
+ bfd all-interfaces enable
+ silent-interface LoopBack698
+ opaque-capability enable
+ hostname
+ area 0.0.0.0
+  network 172.16.97.60 0.0.0.3
+  network 172.16.97.116 0.0.0.3
+  network 172.16.97.124 0.0.0.3
+  network 172.16.97.132 0.0.0.3
+  network 172.16.98.55 0.0.0.0
+#
+snmp-agent
+snmp-agent local-engineid 800007DB03C0FFA8413A01
+snmp-agent community read cipher %^%#C5)Z@&u]S,O+V')f/t-4"Pik&'1a.+Csy\MVDjg/T,$R7H#4_Cun9F3aI;V/o&`g*#3=\Md%alM:|:q~%^%# alias __CommunityAliasName_01_24617
+#
+snmp-agent sys-info version all
+snmp-agent target-host host-name __targetHost_1_5923 trap address udp-domain 172.16.88.13 vpn-instance NMS params securityname cipher %^%#-A%ZKgNms*F7x|RLT#iLbI6N/;lDZ74k/6*RgQh.%^%# v2c
+snmp-agent target-host host-name __targetHost_2_53882 trap address udp-domain 172.16.88.229 vpn-instance NMS params securityname cipher %^%#+]pnIX)|P!DJpP4`dO*Wpg&aG'jobYe.}46.=/N8%^%# v2c
+snmp-agent target-host host-name __targetHost_3_60248 trap address udp-domain 172.16.89.211 vpn-instance NMS params securityname cipher %^%#=^t;X]nc_Nm^pp~E6D.@4VU~X6c;P$.$4MNg/)zY%^%# v2c
+#
+snmp-agent trap source LoopBack698
+#
+snmp-agent protocol source-interface LoopBack698
+undo snmp-agent protocol source-status all-interface
+undo snmp-agent protocol source-status ipv6 all-interface
+#
+undo snmp-agent proxy protocol source-status all-interface
+undo snmp-agent proxy protocol source-status ipv6 all-interface
+#
+snmp-agent trap enable
+#
+lldp enable
+#
+stelnet server enable
+sftp server enable
+sftp server default-directory flash:/
+ssh server authentication-type keyboard-interactive enable
+ssh server-source all-interface
+undo ssh ipv6 server-source all-interface
+ssh authorization-type default aaa
+#
+ssh server cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr
+ssh server hmac sha2_512 sha2_256
+ssh server key-exchange dh_group_exchange_sha256 dh_group16_sha512
+#
+ssh server publickey rsa rsa_sha2_256 rsa_sha2_512
+#
+ssh server dh-exchange min-len 2048
+#
+ssh client first-time enable
+#
+ssh client publickey rsa rsa_sha2_256 rsa_sha2_512
+#
+ssh client cipher aes256_gcm aes128_gcm aes256_ctr aes192_ctr aes128_ctr
+ssh client hmac sha2_512 sha2_256
+ssh client key-exchange dh_group_exchange_sha256 dh_group16_sha512
+#
+command-privilege level 1 view global display current-configuration
+command-privilege level 1 view global display logbuffer
+command-privilege level 1 view global display trapbuffer
+#
+user-interface maximum-vty 5
+#
+user-interface con 0
+ authentication-mode password
+ set authentication password cipher $1c$eG$|=hNP3"$Z=cy.<pZP6Z!(O)~rihMXDbC-Wt0z8=Vr;UYW4dO$
+#
+user-interface vty 0 4
+ authentication-mode aaa
+#
+netconf
+ max-sessions 5
+#
+undo evpn-route-origin igp
+#
+return
+<MTG-DEU-FRA15-VXLAN-6863-01>display lldp nei bri | no-more
+Local Interface         Exptime(s) Neighbor Interface            Neighbor Device     
+-------------------------------------------------------------------------------------
+100GE1/0/1                    103  100GE1/0/1                    MTG-DEU-FRA15-CE-6860
+100GE1/0/2                    102  100GE1/0/2                    MTG-DEU-FRA15-CE-6860
+100GE1/0/3                     99  100GE1/0/5                    MTG-NLD-AMS11-VXLAN-8850
+100GE1/0/4                     98  100GE1/0/5                    MTG-DEU-FR4-VXLAN-8850
+100GE1/0/5                     99  100GE1/0/5                    MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/5                      97  25GE1/0/5                     MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/6                      97  25GE1/0/6                     MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/7                      97  25GE1/0/7                     MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/8                      97  25GE1/0/8                     MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/9                      97  25GE1/0/9                     MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/10                     97  25GE1/0/10                    MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/11                     97  25GE1/0/11                    MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/12                     97  25GE1/0/12                    MTG-DEU-FRA15-VXLAN-6863-02
+25GE1/0/45                    118  100GE1/0/4:1                  MTG-DEU-FRA15-CE-6860
+25GE1/0/46                     99  100GE1/0/4:2                  MTG-DEU-FRA15-CE-6860
+25GE1/0/47                    107  100GE1/0/4:3                  MTG-DEU-FRA15-CE-6860
+25GE1/0/48                    100  100GE1/0/4:4                  MTG-DEU-FRA15-CE-6860
+<MTG-DEU-FRA15-VXLAN-6863-01>display ip routing-table | no-more
+Proto: Protocol        Pre: Preference
+Route Flags: R - relay, D - download to fib, T - to vpn-instance, B - black hole route
+------------------------------------------------------------------------------
+Routing Table : _public_
+         Destinations : 310      Routes : 320       
+
+Destination/Mask    Proto   Pre  Cost        Flags NextHop                                  Interface
+
+      127.0.0.0/8   Direct  0    0             D   127.0.0.1                                InLoopBack0
+      127.0.0.1/32  Direct  0    0             D   127.0.0.1                                InLoopBack0
+127.255.255.255/32  Direct  0    0             D   127.0.0.1                                InLoopBack0
+   192.168.10.1/32  OSPF    10   431           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.2/32  OSPF    10   231           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.3/32  OSPF    10   321           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.4/32  OSPF    10   421           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.5/32  OSPF    10   521           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.6/32  OSPF    10   200           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.7/32  OSPF    10   250           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.10.9/32  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.10/32  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.11/32  OSPF    10   110           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.12/32  OSPF    10   160           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.17/32  OSPF    10   250           D   192.168.101.77                           Eth-Trunk10.100
+  192.168.10.18/32  OSPF    10   250           D   192.168.101.77                           Eth-Trunk10.100
+  192.168.10.19/32  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.20/32  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.21/32  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.22/32  OSPF    10   300           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.23/32  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.24/32  OSPF    10   421           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.25/32  OSPF    10   221           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.26/32  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+  192.168.10.27/32  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+  192.168.10.28/32  OSPF    10   50            D   192.168.101.77                           Eth-Trunk10.100
+  192.168.10.29/32  OSPF    10   162           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.30/32  Direct  0    0             D   127.0.0.1                                LoopBack100
+  192.168.10.31/32  OSPF    10   10            D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.32/32  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+                    OSPF    10   150           D   192.168.101.57                           Eth-Trunk63.100
+  192.168.10.34/32  OSPF    10   100           D   192.168.101.57                           Eth-Trunk63.100
+  192.168.10.35/32  OSPF    10   110           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.38/32  OSPF    10   190           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.10.39/32  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+   192.168.11.1/32  OSPF    10   462           D   192.168.111.198                          Eth-Trunk6.110
+   192.168.11.2/32  OSPF    10   272           D   192.168.111.198                          Eth-Trunk6.110
+   192.168.11.3/32  OSPF    10   362           D   192.168.111.198                          Eth-Trunk6.110
+   192.168.11.4/32  OSPF    10   862           D   192.168.111.198                          Eth-Trunk6.110
+   192.168.11.5/32  OSPF    10   962           D   192.168.111.198                          Eth-Trunk6.110
+   192.168.11.6/32  OSPF    10   220           D   192.168.111.198                          Eth-Trunk6.110
+   192.168.11.7/32  OSPF    10   270           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.11/32  OSPF    10   110           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.12/32  OSPF    10   160           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.17/32  OSPF    10   250           D   192.168.111.77                           Eth-Trunk10.110
+  192.168.11.18/32  OSPF    10   250           D   192.168.111.77                           Eth-Trunk10.110
+  192.168.11.19/32  OSPF    10   265           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.20/32  OSPF    10   230           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.21/32  OSPF    10   230           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.22/32  OSPF    10   350           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.23/32  OSPF    10   260           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.24/32  OSPF    10   462           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.25/32  OSPF    10   262           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.26/32  OSPF    10   200           D   192.168.111.77                           Eth-Trunk10.110
+                    OSPF    10   200           D   192.168.111.57                           Eth-Trunk63.110
+  192.168.11.27/32  OSPF    10   150           D   192.168.111.77                           Eth-Trunk10.110
+  192.168.11.28/32  OSPF    10   50            D   192.168.111.77                           Eth-Trunk10.110
+  192.168.11.29/32  OSPF    10   162           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.30/32  Direct  0    0             D   127.0.0.1                                LoopBack110
+  192.168.11.31/32  OSPF    10   10            D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.32/32  OSPF    10   150           D   192.168.111.57                           Eth-Trunk63.110
+  192.168.11.34/32  OSPF    10   100           D   192.168.111.57                           Eth-Trunk63.110
+  192.168.11.35/32  OSPF    10   110           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.38/32  OSPF    10   210           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.11.39/32  OSPF    10   280           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.12.26/32  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+  192.168.12.27/32  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+  192.168.12.28/32  OSPF    10   50            D   192.168.121.77                           Eth-Trunk10.120
+  192.168.12.30/32  Direct  0    0             D   127.0.0.1                                LoopBack120
+  192.168.12.32/32  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+                    OSPF    10   150           D   192.168.121.57                           Eth-Trunk63.120
+  192.168.12.34/32  OSPF    10   100           D   192.168.121.57                           Eth-Trunk63.120
+  192.168.13.26/32  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+  192.168.13.27/32  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+  192.168.13.28/32  OSPF    10   50            D   192.168.131.77                           Eth-Trunk10.130
+  192.168.13.30/32  Direct  0    0             D   127.0.0.1                                LoopBack130
+  192.168.13.32/32  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+                    OSPF    10   150           D   192.168.131.57                           Eth-Trunk63.130
+  192.168.13.34/32  OSPF    10   100           D   192.168.131.57                           Eth-Trunk63.130
+  192.168.14.26/32  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+  192.168.14.27/32  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+  192.168.14.28/32  OSPF    10   50            D   192.168.141.77                           Eth-Trunk10.140
+  192.168.14.30/32  Direct  0    0             D   127.0.0.1                                LoopBack140
+  192.168.14.32/32  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+                    OSPF    10   150           D   192.168.141.57                           Eth-Trunk63.140
+  192.168.14.34/32  OSPF    10   100           D   192.168.141.57                           Eth-Trunk63.140
+  192.168.100.0/30  OSPF    10   421           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.100.4/30  OSPF    10   521           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.100.8/30  OSPF    10   321           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.12/30  OSPF    10   531           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.16/30  OSPF    10   1431          D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.20/30  OSPF    10   1531          D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.24/30  OSPF    10   421           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.36/30  OSPF    10   721           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.40/30  OSPF    10   321           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.44/30  OSPF    10   521           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.48/30  OSPF    10   621           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.52/30  OSPF    10   421           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.56/30  OSPF    10   170           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.60/30  OSPF    10   270           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.100.80/30  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.100.84/30  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.100.88/30  OSPF    10   300           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.100.92/30  OSPF    10   250           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.100.96/30  OSPF    10   250           D   192.168.101.77                           Eth-Trunk10.100
+192.168.100.100/30  OSPF    10   250           D   192.168.101.77                           Eth-Trunk10.100
+192.168.100.112/30  OSPF    10   210           D   192.168.101.77                           Eth-Trunk10.100
+192.168.100.116/30  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.120/30  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.124/30  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.128/30  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.132/30  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.136/30  OSPF    10   310           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.140/30  OSPF    10   310           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.144/30  OSPF    10   300           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.152/30  OSPF    10   250           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.164/30  OSPF    10   270           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.168/30  OSPF    10   400           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.172/30  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.176/30  OSPF    10   220           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.180/30  OSPF    10   280           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.184/30  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.188/30  OSPF    10   380           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.192/30  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.196/30  OSPF    10   270           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.200/30  OSPF    10   380           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.204/30  OSPF    10   160           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.208/30  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.220/30  OSPF    10   265           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.232/30  OSPF    10   350           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.236/30  OSPF    10   370           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.240/30  OSPF    10   360           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.244/30  OSPF    10   231           D   192.168.101.198                          Eth-Trunk6.100
+192.168.100.248/30  OSPF    10   231           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.101.0/30  OSPF    10   441           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.101.4/30  OSPF    10   431           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.16/30  OSPF    10   270           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.20/30  OSPF    10   164           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.24/30  OSPF    10   162           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.28/30  OSPF    10   332           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.32/30  OSPF    10   262           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.36/30  OSPF    10   300           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.40/30  OSPF    10   277           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.44/30  OSPF    10   160           D   192.168.101.198                          Eth-Trunk6.100
+ 192.168.101.52/30  OSPF    10   200           D   192.168.101.57                           Eth-Trunk63.100
+ 192.168.101.56/30  Direct  0    0             D   192.168.101.58                           Eth-Trunk63.100
+ 192.168.101.58/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.100
+ 192.168.101.59/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.100
+ 192.168.101.60/30  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.101.64/30  OSPF    10   150           D   192.168.101.57                           Eth-Trunk63.100
+ 192.168.101.68/30  OSPF    10   200           D   192.168.101.57                           Eth-Trunk63.100
+ 192.168.101.72/30  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.101.76/30  Direct  0    0             D   192.168.101.78                           Eth-Trunk10.100
+ 192.168.101.78/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.100
+ 192.168.101.79/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.100
+ 192.168.101.80/30  OSPF    10   350           D   192.168.101.77                           Eth-Trunk10.100
+                    OSPF    10   350           D   192.168.101.57                           Eth-Trunk63.100
+ 192.168.101.84/30  OSPF    10   200           D   192.168.101.77                           Eth-Trunk10.100
+ 192.168.101.88/30  OSPF    10   163           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.104/30  OSPF    10   230           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.132/30  OSPF    10   1321          D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.136/30  OSPF    10   521           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.148/30  OSPF    10   262           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.152/30  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.156/30  OSPF    10   110           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.160/30  OSPF    10   110           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.164/30  OSPF    10   150           D   192.168.101.77                           Eth-Trunk10.100
+192.168.101.168/30  OSPF    10   190           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.172/30  OSPF    10   290           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.176/30  OSPF    10   262           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.180/30  OSPF    10   311           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.184/30  OSPF    10   221           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.196/30  Direct  0    0             D   192.168.101.197                          Eth-Trunk6.100
+192.168.101.197/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk6.100
+192.168.101.199/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk6.100
+192.168.101.200/30  OSPF    10   260           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.204/30  OSPF    10   200           D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.208/30  OSPF    10   1121          D   192.168.101.198                          Eth-Trunk6.100
+192.168.101.212/30  OSPF    10   210           D   192.168.101.198                          Eth-Trunk6.100
+  192.168.110.0/30  OSPF    10   462           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.110.4/30  OSPF    10   462           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.110.8/30  OSPF    10   362           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.12/30  OSPF    10   1562          D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.16/30  OSPF    10   1572          D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.20/30  OSPF    10   1472          D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.24/30  OSPF    10   862           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.36/30  OSPF    10   962           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.40/30  OSPF    10   362           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.44/30  OSPF    10   1162          D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.48/30  OSPF    10   1062          D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.52/30  OSPF    10   462           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.56/30  OSPF    10   160           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.60/30  OSPF    10   280           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.110.80/30  OSPF    10   250           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.110.84/30  OSPF    10   150           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.110.88/30  OSPF    10   300           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.110.92/30  OSPF    10   250           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.110.96/30  OSPF    10   250           D   192.168.111.77                           Eth-Trunk10.110
+192.168.110.100/30  OSPF    10   300           D   192.168.111.77                           Eth-Trunk10.110
+                    OSPF    10   300           D   192.168.111.57                           Eth-Trunk63.110
+192.168.110.112/30  OSPF    10   200           D   192.168.111.77                           Eth-Trunk10.110
+192.168.110.116/30  OSPF    10   210           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.120/30  OSPF    10   210           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.124/30  OSPF    10   210           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.140/30  OSPF    10   330           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.144/30  OSPF    10   320           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.152/30  OSPF    10   270           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.156/30  OSPF    10   265           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.164/30  OSPF    10   260           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.168/30  OSPF    10   360           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.172/30  OSPF    10   250           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.176/30  OSPF    10   240           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.180/30  OSPF    10   270           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.184/30  OSPF    10   280           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.188/30  OSPF    10   380           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.192/30  OSPF    10   270           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.196/30  OSPF    10   260           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.200/30  OSPF    10   360           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.204/30  OSPF    10   170           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.208/30  OSPF    10   290           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.220/30  OSPF    10   265           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.236/30  OSPF    10   370           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.240/30  OSPF    10   380           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.244/30  OSPF    10   272           D   192.168.111.198                          Eth-Trunk6.110
+192.168.110.248/30  OSPF    10   272           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.111.0/30  OSPF    10   472           D   192.168.111.198                          Eth-Trunk6.110
+  192.168.111.4/30  OSPF    10   482           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.16/30  OSPF    10   290           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.20/30  OSPF    10   162           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.24/30  OSPF    10   164           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.28/30  OSPF    10   332           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.36/30  OSPF    10   350           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.40/30  OSPF    10   292           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.44/30  OSPF    10   160           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.111.52/30  OSPF    10   400           D   192.168.111.57                           Eth-Trunk63.110
+ 192.168.111.56/30  Direct  0    0             D   192.168.111.58                           Eth-Trunk63.110
+ 192.168.111.58/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.110
+ 192.168.111.59/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.110
+ 192.168.111.60/30  OSPF    10   150           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.111.64/30  OSPF    10   150           D   192.168.111.57                           Eth-Trunk63.110
+ 192.168.111.68/30  OSPF    10   200           D   192.168.111.57                           Eth-Trunk63.110
+ 192.168.111.72/30  OSPF    10   250           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.111.76/30  Direct  0    0             D   192.168.111.78                           Eth-Trunk10.110
+ 192.168.111.78/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.110
+ 192.168.111.79/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.110
+ 192.168.111.80/30  OSPF    10   250           D   192.168.111.57                           Eth-Trunk63.110
+ 192.168.111.84/30  OSPF    10   210           D   192.168.111.77                           Eth-Trunk10.110
+ 192.168.111.88/30  OSPF    10   163           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.104/30  OSPF    10   230           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.132/30  OSPF    10   1362          D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.136/30  OSPF    10   562           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.148/30  OSPF    10   302           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.152/30  OSPF    10   230           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.156/30  OSPF    10   110           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.160/30  OSPF    10   110           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.164/30  OSPF    10   150           D   192.168.111.77                           Eth-Trunk10.110
+192.168.111.168/30  OSPF    10   210           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.172/30  OSPF    10   310           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.176/30  OSPF    10   262           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.180/30  OSPF    10   362           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.184/30  OSPF    10   310           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.196/30  Direct  0    0             D   192.168.111.197                          Eth-Trunk6.110
+192.168.111.197/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk6.110
+192.168.111.199/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk6.110
+192.168.111.200/30  OSPF    10   280           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.204/30  OSPF    10   220           D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.208/30  OSPF    10   1062          D   192.168.111.198                          Eth-Trunk6.110
+192.168.111.212/30  OSPF    10   230           D   192.168.111.198                          Eth-Trunk6.110
+ 192.168.120.80/30  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+ 192.168.120.84/30  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+192.168.120.112/30  OSPF    10   200           D   192.168.121.77                           Eth-Trunk10.120
+ 192.168.121.52/30  OSPF    10   200           D   192.168.121.57                           Eth-Trunk63.120
+ 192.168.121.56/30  Direct  0    0             D   192.168.121.58                           Eth-Trunk63.120
+ 192.168.121.58/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.120
+ 192.168.121.59/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.120
+ 192.168.121.60/30  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+ 192.168.121.64/30  OSPF    10   150           D   192.168.121.57                           Eth-Trunk63.120
+ 192.168.121.68/30  OSPF    10   200           D   192.168.121.57                           Eth-Trunk63.120
+ 192.168.121.72/30  OSPF    10   150           D   192.168.121.77                           Eth-Trunk10.120
+ 192.168.121.76/30  Direct  0    0             D   192.168.121.78                           Eth-Trunk10.120
+ 192.168.121.78/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.120
+ 192.168.121.79/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.120
+ 192.168.121.80/30  OSPF    10   250           D   192.168.121.77                           Eth-Trunk10.120
+                    OSPF    10   250           D   192.168.121.57                           Eth-Trunk63.120
+ 192.168.121.84/30  OSPF    10   210           D   192.168.121.77                           Eth-Trunk10.120
+ 192.168.130.80/30  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+ 192.168.130.84/30  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+192.168.130.112/30  OSPF    10   210           D   192.168.131.77                           Eth-Trunk10.130
+ 192.168.131.52/30  OSPF    10   200           D   192.168.131.57                           Eth-Trunk63.130
+ 192.168.131.56/30  Direct  0    0             D   192.168.131.58                           Eth-Trunk63.130
+ 192.168.131.58/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.130
+ 192.168.131.59/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.130
+ 192.168.131.60/30  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+ 192.168.131.64/30  OSPF    10   150           D   192.168.131.57                           Eth-Trunk63.130
+ 192.168.131.68/30  OSPF    10   200           D   192.168.131.57                           Eth-Trunk63.130
+ 192.168.131.72/30  OSPF    10   150           D   192.168.131.77                           Eth-Trunk10.130
+ 192.168.131.76/30  Direct  0    0             D   192.168.131.78                           Eth-Trunk10.130
+ 192.168.131.78/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.130
+ 192.168.131.79/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.130
+ 192.168.131.80/30  OSPF    10   350           D   192.168.131.77                           Eth-Trunk10.130
+                    OSPF    10   350           D   192.168.131.57                           Eth-Trunk63.130
+ 192.168.131.84/30  OSPF    10   200           D   192.168.131.77                           Eth-Trunk10.130
+ 192.168.140.80/30  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+ 192.168.140.84/30  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+192.168.140.112/30  OSPF    10   200           D   192.168.141.77                           Eth-Trunk10.140
+ 192.168.141.52/30  OSPF    10   200           D   192.168.141.57                           Eth-Trunk63.140
+ 192.168.141.56/30  Direct  0    0             D   192.168.141.58                           Eth-Trunk63.140
+ 192.168.141.58/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.140
+ 192.168.141.59/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk63.140
+ 192.168.141.60/30  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+ 192.168.141.64/30  OSPF    10   150           D   192.168.141.57                           Eth-Trunk63.140
+ 192.168.141.68/30  OSPF    10   200           D   192.168.141.57                           Eth-Trunk63.140
+ 192.168.141.72/30  OSPF    10   150           D   192.168.141.77                           Eth-Trunk10.140
+ 192.168.141.76/30  Direct  0    0             D   192.168.141.78                           Eth-Trunk10.140
+ 192.168.141.78/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.140
+ 192.168.141.79/32  Direct  0    0             D   127.0.0.1                                Eth-Trunk10.140
+ 192.168.141.80/30  OSPF    10   250           D   192.168.141.77                           Eth-Trunk10.140
+                    OSPF    10   250           D   192.168.141.57                           Eth-Trunk63.140
+ 192.168.141.84/30  OSPF    10   210           D   192.168.141.77                           Eth-Trunk10.140
+255.255.255.255/32  Direct  0    0             D   127.0.0.1                                InLoopBack0
+<MTG-DEU-FRA15-VXLAN-6863-01>display interface bri | no-more
+PHY: Physical
+*down: administratively down
+^down: standby
+(l): loopback
+(s): spoofing
+(b): BFD down
+(e): ETHOAM down
+(d): Dampening Suppressed
+(p): port alarm down
+(dl): DLDP down
+(c): CFM down
+(sd): STP instance discarding
+(ed): error down
+InUti/OutUti: input utility rate/output utility rate
+Interface                  PHY      Protocol  InUti OutUti   inErrors  outErrors
+100GE1/0/6                 down     down         0%     0%          0          0
+25GE1/0/1                  down     down         0%     0%          0          0
+25GE1/0/2                  down     down         0%     0%          0          0
+25GE1/0/3                  down     down         0%     0%          0          0
+25GE1/0/4                  down     down         0%     0%          0          0
+25GE1/0/13                 down     down         0%     0%          0          0
+25GE1/0/14                 down     down         0%     0%          0          0
+25GE1/0/15                 down     down         0%     0%          0          0
+25GE1/0/16                 down     down         0%     0%          0          0
+25GE1/0/17                 down     down         0%     0%          0          0
+25GE1/0/18                 down     down         0%     0%          0          0
+25GE1/0/19                 down     down         0%     0%          0          0
+25GE1/0/20                 down     down         0%     0%          0          0
+25GE1/0/21                 down     down         0%     0%          0          0
+25GE1/0/22                 down     down         0%     0%          0          0
+25GE1/0/23                 down     down         0%     0%          0          0
+25GE1/0/24                 down     down         0%     0%          0          0
+25GE1/0/25                 down     down         0%     0%          0          0
+25GE1/0/26                 down     down         0%     0%          0          0
+25GE1/0/27                 down     down         0%     0%          0          0
+25GE1/0/28                 down     down         0%     0%          0          0
+25GE1/0/29                 down     down         0%     0%          0          0
+25GE1/0/30                 down     down         0%     0%          0          0
+25GE1/0/31                 down     down         0%     0%          0          0
+25GE1/0/32                 down     down         0%     0%          0          0
+25GE1/0/33                 down     down         0%     0%          0          0
+25GE1/0/34                 down     down         0%     0%          0          0
+25GE1/0/35                 down     down         0%     0%          0          0
+25GE1/0/36                 down     down         0%     0%          0          0
+25GE1/0/37                 down     down         0%     0%          0          0
+25GE1/0/38                 down     down         0%     0%          0          0
+25GE1/0/39                 down     down         0%     0%          0          0
+25GE1/0/40                 down     down         0%     0%          0          0
+25GE1/0/41                 down     down         0%     0%          0          0
+25GE1/0/42                 down     down         0%     0%          0          0
+25GE1/0/43                 down     down         0%     0%          0          0
+25GE1/0/44                 down     down         0%     0%          0          0
+25GE1/0/45                 up       down      0.01%  0.01%          0          0
+25GE1/0/46                 up       down      0.01%  0.01%          0          0
+25GE1/0/47                 up       down      0.01%  0.01%          0          0
+25GE1/0/48                 up       down      0.01%  0.01%          0          0
+Eth-Trunk0                 up       down      0.01%  0.01%          0          0
+  100GE1/0/1               up       up        0.01%  0.01%          0          0
+Eth-Trunk0.1698            up       up           0%     0%          0          0
+Eth-Trunk2                 up       down      0.01%  0.01%          0          0
+  100GE1/0/2               up       up        0.01%  0.01%          0          0
+Eth-Trunk2.3224            up       up           0%  0.01%          0          0
+Eth-Trunk2.3225            up       up        0.01%  0.01%          0          0
+Eth-Trunk5                 up       down      0.01%  0.01%          0          0
+  25GE1/0/5                up       up        0.01%  0.01%          0          0
+  25GE1/0/6                up       up        0.01%  0.01%          0          0
+  25GE1/0/7                up       up        0.01%  0.01%          0          0
+  25GE1/0/8                up       up        0.01%  0.01%          0          0
+  25GE1/0/9                up       up        0.01%  0.01%          0          0
+  25GE1/0/10               up       up        0.01%  0.01%          0          0
+  25GE1/0/11               up       up        0.01%  0.01%          0          0
+  25GE1/0/12               up       up        0.01%  0.01%          0          0
+Eth-Trunk5.1698            up       up           0%     0%          0          0
+Eth-Trunk6                 up       down      0.01%  0.01%          0          0
+  100GE1/0/5               up       up        0.01%  0.01%          0          0
+Eth-Trunk6.100             up       up        0.01%  0.01%          0          0
+Eth-Trunk6.110             up       up        0.01%  0.01%          0          0
+Eth-Trunk10                up       down      0.01%  0.01%          0          0
+  100GE1/0/4               up       up        0.01%  0.01%          0          0
+Eth-Trunk10.100            up       up        0.01%  0.01%          0          0
+Eth-Trunk10.110            up       up        0.01%  0.01%          0          0
+Eth-Trunk10.120            up       up        0.01%  0.01%          0          0
+Eth-Trunk10.130            up       up        0.01%  0.01%          0          0
+Eth-Trunk10.140            up       up        0.01%  0.01%          0          0
+Eth-Trunk10.1698           up       up           0%     0%          0          0
+Eth-Trunk63                up       down      0.01%  0.01%          0          0
+  100GE1/0/3               up       up        0.01%  0.01%          0          0
+Eth-Trunk63.100            up       up        0.01%  0.01%          0          0
+Eth-Trunk63.110            up       up        0.01%  0.01%          0          0
+Eth-Trunk63.120            up       up        0.01%  0.01%          0          0
+Eth-Trunk63.130            up       up        0.01%  0.01%          0          0
+Eth-Trunk63.140            up       up        0.01%  0.01%          0          0
+Eth-Trunk63.1698           up       up           0%     0%          0          0
+LoopBack100                up       up(s)        0%     0%          0          0
+LoopBack110                up       up(s)        0%     0%          0          0
+LoopBack120                up       up(s)        0%     0%          0          0
+LoopBack130                up       up(s)        0%     0%          0          0
+LoopBack140                up       up(s)        0%     0%          0          0
+LoopBack698                up       up(s)        0%     0%          0          0
+MEth0/0/0                  down     down         0%     0%          0          0
+NULL0                      up       up(s)        0%     0%          0          0
+Nve1                       up       up           --     --          0          0
+<MTG-DEU-FRA15-VXLAN-6863-01>display mac-address | no-moredisplay device manufac [1Dture-info | no-more
+                                                   ^
+Error: Unrecognized command found at '^' position.
+<MTG-DEU-FRA15-VXLAN-6863-01>display interface description | no-more
+PHY: Physical
+*down: administratively down
+^down: standby
+(l): loopback
+(s): spoofing
+(b): BFD down
+(e): ETHOAM down
+(d): Dampening Suppressed
+(p): port alarm down
+(dl): DLDP down
+(c): CFM down
+(ed): error down
+Interface                     PHY     Protocol Description                     
+100GE1/0/1                    up      up       TO CE6860                       
+100GE1/0/2                    up      up       P18-[FRA15<>AMS11]-TO CE6860    
+100GE1/0/3                    up      up       ZAYO-[FRA15<>AMS11]-XCID:(X02)  
+100GE1/0/4                    up      up       RETN_LL-[FRA15<>FR4]-XCID:DE289452(X01)
+100GE1/0/5                    up      up       PE01<>PE02                      
+100GE1/0/6                    down    down                                     
+25GE1/0/1                     down    down                                     
+25GE1/0/2                     down    down                                     
+25GE1/0/3                     down    down                                     
+25GE1/0/4                     down    down                                     
+25GE1/0/5                     up      up       TO CE6863-02                    
+25GE1/0/6                     up      up       TO CE6863-02                    
+25GE1/0/7                     up      up       TO CE6863-02                    
+25GE1/0/8                     up      up       TO CE6863-02                    
+25GE1/0/9                     up      up       TO CE6863-02                    
+25GE1/0/10                    up      up       TO CE6863-02                    
+25GE1/0/11                    up      up       TO CE6863-02                    
+25GE1/0/12                    up      up       TO CE6863-02                    
+25GE1/0/13                    down    down                                     
+25GE1/0/14                    down    down                                     
+25GE1/0/15                    down    down                                     
+25GE1/0/16                    down    down                                     
+25GE1/0/17                    down    down                                     
+25GE1/0/18                    down    down                                     
+25GE1/0/19                    down    down                                     
+25GE1/0/20                    down    down                                     
+25GE1/0/21                    down    down                                     
+25GE1/0/22                    down    down                                     
+25GE1/0/23                    down    down                                     
+25GE1/0/24                    down    down                                     
+25GE1/0/25                    down    down                                     
+25GE1/0/26                    down    down                                     
+25GE1/0/27                    down    down                                     
+25GE1/0/28                    down    down                                     
+25GE1/0/29                    down    down                                     
+25GE1/0/30                    down    down                                     
+25GE1/0/31                    down    down                                     
+25GE1/0/32                    down    down                                     
+25GE1/0/33                    down    down                                     
+25GE1/0/34                    down    down                                     
+25GE1/0/35                    down    down                                     
+25GE1/0/36                    down    down                                     
+25GE1/0/37                    down    down                                     
+25GE1/0/38                    down    down                                     
+25GE1/0/39                    down    down                                     
+25GE1/0/40                    down    down                                     
+25GE1/0/41                    down    down                                     
+25GE1/0/42                    down    down                                     
+25GE1/0/43                    down    down                                     
+25GE1/0/44                    down    down                                     
+25GE1/0/45                    up      down                                     
+25GE1/0/46                    up      down                                     
+25GE1/0/47                    up      down                                     
+25GE1/0/48                    up      down                                     
+Eth-Trunk0                    up      down     TO CE6860                       
+Eth-Trunk0.1698               up      up       NMS                             
+Eth-Trunk2                    up      down     P18-[FRA15<>AMS11]-TO CE6860    
+Eth-Trunk2.3224               up      up       P18_[FRA15<>AMS11]_VLAN3224     
+Eth-Trunk2.3225               up      up       P18_[FRA15<>AMS11]_VLAN3225_BFD 
+Eth-Trunk5                    up      down     TO CE6863-02                    
+Eth-Trunk5.1698               up      up       NMS                             
+Eth-Trunk6                    up      down     PE01<>PE02                      
+Eth-Trunk6.100                up      up       PE01<>PE02                      
+Eth-Trunk6.110                up      up       PE01<>PE02                      
+Eth-Trunk10                   up      down     RETN_LL-[FRA15<>FR4]            
+Eth-Trunk10.100               up      up       RETN_LL-[FRA15<>FR4]            
+Eth-Trunk10.110               up      up       RETN_LL-[FRA15<>FR4]            
+Eth-Trunk10.120               up      up       RETN_LL-[FRA15<>FR4]            
+Eth-Trunk10.130               up      up       RETN_LL-[FRA15<>FR4]            
+Eth-Trunk10.140               up      up       RETN_LL-[FRA15<>FR4]            
+Eth-Trunk10.1698              up      up       NMS                             
+Eth-Trunk63                   up      down     ZAYO-[FRA15<>AMS11]             
+Eth-Trunk63.100               up      up       ZAYO-[FRA15<>AMS11]             
+Eth-Trunk63.110               up      up       ZAYO-[FRA15<>AMS11]             
+Eth-Trunk63.120               up      up       ZAYO-[FRA15<>AMS11]             
+Eth-Trunk63.130               up      up       ZAYO-[FRA15<>AMS11]             
+Eth-Trunk63.140               up      up       ZAYO-[FRA15<>AMS11]             
+Eth-Trunk63.1698              up      up       NMS                             
+Loop100                       up      up(s)    OSPF 100                        
+Loop110                       up      up(s)    OSPF 110                        
+Loop120                       up      up(s)    OSPF 120                        
+Loop130                       up      up(s)    OSPF 130                        
+Loop140                       up      up(s)    OSPF 140                        
+Loop698                       up      up(s)    NMS                             
+MEth0/0/0                     down    down                                     
+NULL0                         up      up(s)                                    
+Nve1                          up      up                                       
+<MTG-DEU-FRA15-VXLAN-6863-01>display interface transceiver | no-more
+
+ 100GE1/0/1 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :100GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :16(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :DQF8503-4C16
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S51B2JYH079
+   Manufacturing Date                    :2021-2-17
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 100GE1/0/2 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :100GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :14(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :DQF8503L-4C14
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S51C4JLE3E9
+   Manufacturing Date                    :2022-4-28
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 100GE1/0/3 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :100GBASE_LR4
+   Connector Type                        :LC
+   Wavelength (nm)                       :1310
+   Transfer Distance (m)                 :10000(9um/125um SMF)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :SOURCE PHOTONICS
+   Vendor Part Number                    :SPQCELRCDFAHW
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :L322000195
+   Manufacturing Date                    :2021-2-1
+   Vendor Name                           :SOURCE PHOTONICS
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 100GE1/0/4 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :100GBASE_LR4
+   Connector Type                        :LC
+   Wavelength (nm)                       :1310
+   Transfer Distance (m)                 :10000(9um/125um SMF)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :SOURCE PHOTONICS
+   Vendor Part Number                    :SPQCELRCDFAHW
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :M6H2002514
+   Manufacturing Date                    :2022-5-16
+   Vendor Name                           :SOURCE PHOTONICS
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 100GE1/0/5 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :100GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :9(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :DQF8503L-4C09
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S51C9UC961Z
+   Manufacturing Date                    :2022-9-6
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/5 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H05BG
+   Manufacturing Date                    :2019-5-26
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/6 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H05AR
+   Manufacturing Date                    :2019-5-26
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/7 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H0394
+   Manufacturing Date                    :2019-5-21
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/8 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H058E
+   Manufacturing Date                    :2019-5-26
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/9 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H0590
+   Manufacturing Date                    :2019-5-26
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/10 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H0576
+   Manufacturing Date                    :2019-5-26
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/11 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H058S
+   Manufacturing Date                    :2019-5-26
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/12 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :7(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Hisense
+   Vendor Part Number                    :LTF8507-PC07
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :S50957H03S5
+   Manufacturing Date                    :2019-5-18
+   Vendor Name                           :Hisense
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/45 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :10(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Alibaba
+   Vendor Part Number                    :AB-QT0685ACS20B
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :HSR0UUGA8A00615A
+   Manufacturing Date                    :2020-8-12
+   Vendor Name                           :Alibaba
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/46 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :10(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Alibaba
+   Vendor Part Number                    :AB-QT0685ACS20B
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :HSR0UUGA8A00615B
+   Manufacturing Date                    :2020-8-12
+   Vendor Name                           :Alibaba
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/47 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :10(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Alibaba
+   Vendor Part Number                    :AB-QT0685ACS20B
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :HSR0UUGA8A00615C
+   Manufacturing Date                    :2020-8-12
+   Vendor Name                           :Alibaba
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+
+ 25GE1/0/48 transceiver information:
+-------------------------------------------------------------------
+ Common information:
+   Transceiver Type                      :25GBASE_Active_Optical_Cable
+   Connector Type                        :-
+   Wavelength (nm)                       :-
+   Transfer Distance (m)                 :10(Optical Cable)
+   Digital Diagnostic Monitoring         :YES
+   Vendor Name                           :Alibaba
+   Vendor Part Number                    :AB-QT0685ACS20B
+-------------------------------------------------------------------
+ Manufacture information:
+   Manu. Serial Number                   :HSR0UUGA8A00615D
+   Manufacturing Date                    :2020-8-12
+   Vendor Name                           :Alibaba
+-------------------------------------------------------------------
+ Alarm information:
+-------------------------------------------------------------------
+ Warning information:
+-------------------------------------------------------------------
+<MTG-DEU-FRA15-VXLAN-6863-01>
